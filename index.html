@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Ürün Takip Sistemi</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f8f9fa; margin: 30px; }
+  h2 { margin-bottom: 15px; }
+  table { border-collapse: collapse; width: 100%; margin-top: 10px; background: white; }
+  th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+  th { background: #e9ecef; }
+  input[type="number"], input[type="text"] { width: 90%; padding: 4px; }
+  button { margin: 5px; padding: 6px 12px; border: none; border-radius: 6px; background: #0078d7; color: white; cursor: pointer; }
+  button:hover { background: #005fa3; }
+  .yesil { background: #90EE90; }
+  .kirmizi { background: #FF6347; }
+  .kontrolAlani { margin-bottom: 15px; }
+</style>
+</head>
+<body>
+
+<h2>Ürün Takip Sistemi</h2>
+
+<div class="kontrolAlani">
+  <input type="text" id="kullaniciAdi" placeholder="Kullanıcı adı giriniz">
+  <button onclick="kullaniciEkle()">Kullanıcı Ekle</button>
+  <button onclick="urunEkle()">Ürün Ekle</button>
+  <button onclick="genelToplam()">Genel Toplam</button>
+  <button onclick="tabloTemizle()">Tabloyu Temizle</button>
+</div>
+
+<table id="urunTablo">
+  <thead>
+    <tr id="baslikSatir">
+      <th>SİTE</th>
+      <th>ÜRÜN</th>
+      <th>ADET FİYATI</th>
+      <th>ALINAN ADET</th>
+      <th>TOPLAM FİYAT</th>
+    </tr>
+  </thead>
+  <tbody id="urunBody">
+    <tr>
+      <td><input type="text"></td>
+      <td><input type="text"></td>
+      <td><input type="number" min="0" value="0"></td>
+      <td><input type="number" min="0" value="0"></td>
+      <td class="readonly"></td>
+    </tr>
+  </tbody>
+</table>
+
+<script>
+function kullaniciEkle() {
+  const ad = document.getElementById("kullaniciAdi").value.trim();
+  if (!ad) { alert("Lütfen bir kullanıcı adı giriniz."); return; }
+
+  const baslik = document.getElementById("baslikSatir");
+  const thAdet = document.createElement("th");
+  thAdet.textContent = ad + " ADET";
+  const thFiyat = document.createElement("th");
+  thFiyat.textContent = ad + " FİYAT";
+  baslik.appendChild(thAdet);
+  baslik.appendChild(thFiyat);
+
+  const satirlar = document.querySelectorAll("#urunBody tr");
+  satirlar.forEach(tr => {
+    const adet = document.createElement("td");
+    adet.innerHTML = `<input type="number" min="0" value="0">`;
+    const fiyat = document.createElement("td");
+    fiyat.classList.add("readonly");
+    tr.appendChild(adet);
+    tr.appendChild(fiyat);
+  });
+
+  document.getElementById("kullaniciAdi").value = "";
+}
+
+function urunEkle() {
+  const tablo = document.getElementById("urunTablo");
+  const satir = document.createElement("tr");
+
+  const baslikSutun = document.querySelectorAll("#baslikSatir th").length;
+  for (let i = 0; i < baslikSutun; i++) {
+    const td = document.createElement("td");
+    if (i === 0 || i === 1) {
+      td.innerHTML = `<input type="text">`;
+    } else if (i === 2 || i === 3 || (i > 4 && i % 2 === 1)) {
+      td.innerHTML = `<input type="number" min="0" value="0">`;
+    }
+    satir.appendChild(td);
+  }
+
+  tablo.querySelector("tbody").appendChild(satir);
+}
+
+function urunleriHesapla() {
+  const satirlar = document.querySelectorAll("#urunBody tr");
+  satirlar.forEach(tr => {
+    const fiyat = Number(tr.cells[2].querySelector("input").value);
+    const adet = Number(tr.cells[3].querySelector("input").value);
+    tr.cells[4].textContent = (fiyat * adet).toFixed(2);
+
+    for (let j = 5; j < tr.cells.length; j += 2) {
+      const adetK = tr.cells[j].querySelector("input");
+      if (adetK) {
+        const val = Number(adetK.value);
+        const fiyatK = tr.cells[j + 1];
+        fiyatK.textContent = (val * fiyat).toFixed(2);
+      }
+    }
+  });
+}
+
+function genelToplam() {
+  urunleriHesapla();
+  const tablo = document.getElementById("urunTablo");
+  const satirlar = document.querySelectorAll("#urunBody tr");
+  let toplamSatir = document.getElementById("genelToplamSatir");
+  if (toplamSatir) toplamSatir.remove();
+
+  let hataVar = false;
+  satirlar.forEach(tr => {
+    let toplamAdet = 0;
+    for (let j = 5; j < tr.cells.length; j += 2) {
+      const adet = tr.cells[j].querySelector("input");
+      if (adet) toplamAdet += Number(adet.value);
+    }
+    const alinan = Number(tr.cells[3].querySelector("input").value);
+    const adetHucre = tr.cells[3].querySelector("input");
+    if (alinan === toplamAdet) {
+      adetHucre.style.background = "#90EE90";
+    } else {
+      adetHucre.style.background = "#FF6347";
+      hataVar = true;
+    }
+  });
+
+  if (hataVar) {
+    alert("Bazı ürünlerde dağıtılan adet ile alınan adet eşleşmiyor!");
+    return;
+  }
+
+  const toplamSatirYeni = tablo.insertRow(-1);
+  toplamSatirYeni.id = "genelToplamSatir";
+  const hucre = toplamSatirYeni.insertCell(0);
+  hucre.colSpan = 2;
+  hucre.textContent = "GENEL TOPLAM";
+  hucre.style.fontWeight = "bold";
+  toplamSatirYeni.insertCell(1); // Boş
+
+  const baslikSutun = document.querySelectorAll("#baslikSatir th").length;
+  for (let i = 2; i < baslikSutun; i++) {
+    let toplam = 0;
+    satirlar.forEach(tr => {
+      const val = tr.cells[i].querySelector("input")
+        ? Number(tr.cells[i].querySelector("input").value)
+        : Number(tr.cells[i].textContent);
+      toplam += val || 0;
+    });
+    const td = toplamSatirYeni.insertCell(-1);
+    td.textContent = toplam.toFixed(2);
+  }
+}
+
+function tabloTemizle() {
+  if (!confirm("Tabloyu tamamen sıfırlamak istediğine emin misin?")) return;
+
+  const tbody = document.getElementById("urunBody");
+  tbody.innerHTML = `
+    <tr>
+      <td><input type="text"></td>
+      <td><input type="text"></td>
+      <td><input type="number" min="0" value="0"></td>
+      <td><input type="number" min="0" value="0"></td>
+      <td class="readonly"></td>
+    </tr>`;
+  document.getElementById("baslikSatir").innerHTML = `
+      <th>SİTE</th>
+      <th>ÜRÜN</th>
+      <th>ADET FİYATI</th>
+      <th>ALINAN ADET</th>
+      <th>TOPLAM FİYAT</th>`;
+  alert("Tablo sıfırlandı.");
+}
+</script>
+
+</body>
+</html>
