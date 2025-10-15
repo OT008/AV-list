@@ -11,11 +11,10 @@
   th { background: #e9ecef; }
   input[type="number"], input[type="text"] { width: 90%; padding: 4px; }
   button { margin: 5px; padding: 6px 12px; border: none; border-radius: 6px; color: white; cursor: pointer; transition: background 0.3s; }
-  #btnKullaniciEkle, #btnUrunEkle { background: #0078d7; }
-  #btnGenelToplam { background: #0078d7; }
-  #btnTemizle { background: #dc3545; } /* kırmızıya çevrildi */
+  #btnKullaniciEkle, #btnUrunEkle, #btnGenelToplam { background: #0078d7; }
+  #btnTemizle { background: #dc3545; } /* kırmızı */
   button:hover:not(:disabled) { filter: brightness(0.9); }
-  button:disabled { background: #b0b0b0 !important; cursor: not-allowed; } /* gri devre dışı rengi */
+  button:disabled { background: #b0b0b0 !important; cursor: not-allowed; }
   .yesil { background: #90EE90; }
   .kirmizi { background: #FF6347; }
 </style>
@@ -122,10 +121,10 @@ function genelToplam() {
   const btnKullanici = document.getElementById("btnKullaniciEkle");
   const btnUrun = document.getElementById("btnUrunEkle");
 
-  // Eğer zaten toplam satırı varsa, kaldır
+  // Mevcut satır varsa kaldır
   if (mevcutSatir) {
     mevcutSatir.remove();
-    btn.style.background = "#0078d7"; // maviye döner
+    btn.style.background = "#0078d7"; // mavi
     btnKullanici.disabled = false;
     btnUrun.disabled = false;
     return;
@@ -163,57 +162,37 @@ function genelToplam() {
   toplamSatirYeni.id = "genelToplamSatir";
 
   const hucre = toplamSatirYeni.insertCell(0);
-  hucre.colSpan = 2;
+  hucre.colSpan = 4;
   hucre.textContent = "GENEL TOPLAM";
   hucre.style.fontWeight = "bold";
   hucre.style.textAlign = "center";
 
-  const baslikSutun = document.querySelectorAll("#baslikSatir th").length;
-  for (let i = 2; i < baslikSutun; i++) {
+  const basliklar = document.querySelectorAll("#baslikSatir th");
+  for (let i = 4; i < basliklar.length; i++) {
     let toplam = 0;
-    satirlar.forEach(tr => {
-      const val = tr.cells[i].querySelector("input")
-        ? Number(tr.cells[i].querySelector("input").value)
-        : Number(tr.cells[i].textContent);
-      toplam += val || 0;
-    });
-    const td = toplamSatirYeni.insertCell(-1);
-    td.textContent = toplam.toFixed(2);
+    const baslikText = basliklar[i].textContent;
+
+    // Sadece FİYAT sütunlarını topla
+    if (baslikText.includes("FİYAT")) {
+      document.querySelectorAll("#urunBody tr").forEach(tr => {
+        const val = tr.cells[i].querySelector("input")
+          ? Number(tr.cells[i].querySelector("input").value)
+          : Number(tr.cells[i].textContent);
+        toplam += val || 0;
+      });
+
+      const td = toplamSatirYeni.insertCell(-1);
+      if (baslikText === "TOPLAM FİYAT") {
+        td.textContent = toplam.toFixed(2);
+      } else {
+        const kisiAdi = baslikText.replace(" FİYAT", "");
+        td.textContent = `${kisiAdi} Ödeyeceği: ${toplam.toFixed(2)}`;
+      }
+    }
   }
 
-  // Butonları devre dışı bırak + gri renk
   btnKullanici.disabled = true;
   btnUrun.disabled = true;
 }
 
-function tabloTemizle() {
-  if (!confirm("Tabloyu tamamen sıfırlamak istediğine emin misin?")) return;
-
-  const tbody = document.getElementById("urunBody");
-  tbody.innerHTML = `
-    <tr>
-      <td><input type="text"></td>
-      <td><input type="text"></td>
-      <td><input type="number" min="0" value="0"></td>
-      <td><input type="number" min="0" value="0"></td>
-      <td class="readonly"></td>
-    </tr>`;
-  document.getElementById("baslikSatir").innerHTML = `
-      <th>SİTE</th>
-      <th>ÜRÜN</th>
-      <th>ADET FİYATI</th>
-      <th>ALINAN ADET</th>
-      <th>TOPLAM FİYAT</th>`;
-
-  // Butonları ve renkleri sıfırla
-  const btn = document.getElementById("btnGenelToplam");
-  btn.style.background = "#0078d7";
-  document.getElementById("btnKullaniciEkle").disabled = false;
-  document.getElementById("btnUrunEkle").disabled = false;
-
-  alert("Tablo sıfırlandı.");
-}
-</script>
-
-</body>
-</html>
+function tablo
