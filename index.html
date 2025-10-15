@@ -17,7 +17,7 @@
   button:disabled { background: #b0b0b0 !important; cursor: not-allowed; }
   .yesil { background: #90EE90; }
   .kirmizi { background: #FF6347; }
-  #genelToplamSatir td { background: #fff8dc; font-weight: bold; } /* açık sarı arka plan */
+  #genelToplamSatir td { background: #fff8dc; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -161,27 +161,31 @@ function genelToplam() {
   const toplamSatirYeni = tablo.insertRow(-1);
   toplamSatirYeni.id = "genelToplamSatir";
 
-  // Genel toplam hücresi (4 hücre birleşimi)
   const genelHucre = toplamSatirYeni.insertCell(0);
   genelHucre.colSpan = 4;
   genelHucre.textContent = "GENEL TOPLAM";
   genelHucre.style.textAlign = "center";
 
   const basliklar = document.querySelectorAll("#baslikSatir th");
+  let toplamHucreIndex = 4; // "TOPLAM FİYAT" sütunu
+
   for (let i = 4; i < basliklar.length; i++) {
     const baslikText = basliklar[i].textContent;
     if (!baslikText.includes("FİYAT")) continue;
 
+    // doğru sütundan topla
     let toplam = 0;
     satirlar.forEach(tr => {
-      const val = tr.cells[i].querySelector("input")
-        ? Number(tr.cells[i].querySelector("input").value)
-        : Number(tr.cells[i].textContent);
-      toplam += val || 0;
+      const hucre = tr.cells[i];
+      if (hucre) {
+        const val = hucre.querySelector("input")
+          ? Number(hucre.querySelector("input").value)
+          : Number(hucre.textContent);
+        toplam += val || 0;
+      }
     });
 
-    // doğru hizalama için boş hücreler eklenmeden hesapla
-    const td = toplamSatirYeni.insertCell(i - 3); // ofset düzeltme
+    const td = toplamSatirYeni.insertCell(i - 3); // hizalama sabit kalır
     if (baslikText === "TOPLAM FİYAT") {
       td.textContent = toplam.toFixed(2);
     } else {
