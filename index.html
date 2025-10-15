@@ -17,6 +17,7 @@
   button:disabled { background: #b0b0b0 !important; cursor: not-allowed; }
   .btnAdd { background: #28a745; border-radius: 50%; width: 24px; height: 24px; padding: 0; font-weight: bold; }
   .btnRemove { background: #dc3545; border-radius: 50%; width: 24px; height: 24px; padding: 0; font-weight: bold; }
+  .btnAdd:disabled, .btnRemove:disabled { background: #b0b0b0; cursor: not-allowed; }
   #genelToplamSatir td { background: #fff8dc; font-weight: bold; }
 </style>
 </head>
@@ -81,33 +82,23 @@ function kullaniciEkle() {
 }
 
 function satirEkle(btn) {
-  urunleriHesapla();
   const tr = btn.closest("tr");
-  const tablo = document.getElementById("urunTablo");
   const yeniSatir = tr.cloneNode(true);
-
-  // Tüm inputları sıfırla
   yeniSatir.querySelectorAll("input").forEach(inp => {
     inp.value = (inp.type === "number") ? 0 : "";
   });
 
-  // Üstteki butonu "-" yap
   const ustBtn = tr.querySelector(".btnAdd");
   ustBtn.textContent = "−";
   ustBtn.className = "btnRemove";
   ustBtn.onclick = function() { satirSil(this); };
 
-  // Yeni satırın ilk hücresi "+"
-  const ilkHucre = yeniSatir.cells[0];
-  ilkHucre.innerHTML = `<button class="btnAdd" onclick="satirEkle(this)">+</button>`;
-
-  // Altına ekle
+  yeniSatir.cells[0].innerHTML = `<button class="btnAdd" onclick="satirEkle(this)">+</button>`;
   tr.insertAdjacentElement("afterend", yeniSatir);
 }
 
 function satirSil(btn) {
-  const tr = btn.closest("tr");
-  tr.remove();
+  btn.closest("tr").remove();
 }
 
 function urunleriHesapla() {
@@ -138,6 +129,7 @@ function genelToplam() {
     mevcutSatir.remove();
     btn.style.background = "#0078d7";
     btnKullanici.disabled = false;
+    toggleSatirButonlari(true);
     return;
   }
 
@@ -172,19 +164,19 @@ function genelToplam() {
   const toplamSatirYeni = tablo.insertRow(-1);
   toplamSatirYeni.id = "genelToplamSatir";
 
-  // "GENEL TOPLAM" hücresi (5 birleşik, çünkü 1 ek sütun var)
+  // DÜZELTME: 5 hücre birleşmeli (1 + 4 sütun)
   const genelHucre = toplamSatirYeni.insertCell(0);
   genelHucre.colSpan = 5;
   genelHucre.textContent = "GENEL TOPLAM";
   genelHucre.style.textAlign = "center";
 
-  // TOPLAM FİYAT sütunu
+  // TOPLAM FİYAT
   let toplamFiyat = 0;
   satirlar.forEach(tr => toplamFiyat += Number(tr.cells[5].textContent) || 0);
   const tdToplam = toplamSatirYeni.insertCell(-1);
   tdToplam.textContent = toplamFiyat.toFixed(2) + " ₺";
 
-  // Kişi sütunları
+  // Kişiler
   const basliklar = document.querySelectorAll("#baslikSatir th");
   for (let i = 0; i < basliklar.length; i++) {
     if (basliklar[i].textContent.endsWith("FİYAT")) {
@@ -203,6 +195,13 @@ function genelToplam() {
   }
 
   btnKullanici.disabled = true;
+  toggleSatirButonlari(false);
+}
+
+function toggleSatirButonlari(aktif) {
+  document.querySelectorAll(".btnAdd, .btnRemove").forEach(btn => {
+    btn.disabled = !aktif;
+  });
 }
 
 function tabloTemizle() {
@@ -226,6 +225,7 @@ function tabloTemizle() {
   const btn = document.getElementById("btnGenelToplam");
   btn.style.background = "#0078d7";
   document.getElementById("btnKullaniciEkle").disabled = false;
+  toggleSatirButonlari(true);
   alert("Tablo sıfırlandı.");
 }
 </script>
