@@ -10,19 +10,21 @@
   th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
   th { background: #e9ecef; }
   input[type="number"], input[type="text"] { width: 90%; padding: 4px; }
-  button { margin: 5px; padding: 6px 12px; border: none; border-radius: 6px; background: #0078d7; color: white; cursor: pointer; }
-  button:hover:not(:disabled) { background: #005fa3; }
+  button { margin: 5px; padding: 6px 12px; border: none; border-radius: 6px; color: white; cursor: pointer; transition: background 0.3s; }
+  #btnKullaniciEkle, #btnUrunEkle { background: #0078d7; }
+  #btnGenelToplam { background: #0078d7; }
+  #btnTemizle { background: #6c757d; }
+  button:hover:not(:disabled) { filter: brightness(0.9); }
   button:disabled { background: #aaa; cursor: not-allowed; }
   .yesil { background: #90EE90; }
   .kirmizi { background: #FF6347; }
-  .kontrolAlani { margin-bottom: 15px; }
 </style>
 </head>
 <body>
 
 <h2>Ürün Takip Sistemi</h2>
 
-<div class="kontrolAlani">
+<div>
   <input type="text" id="kullaniciAdi" placeholder="Kullanıcı adı giriniz">
   <button id="btnKullaniciEkle" onclick="kullaniciEkle()">Kullanıcı Ekle</button>
   <button id="btnUrunEkle" onclick="urunEkle()">Ürün Ekle</button>
@@ -114,11 +116,21 @@ function urunleriHesapla() {
 }
 
 function genelToplam() {
-  urunleriHesapla();
+  const btn = document.getElementById("btnGenelToplam");
   const tablo = document.getElementById("urunTablo");
-  const satirlar = document.querySelectorAll("#urunBody tr");
   const mevcutSatir = document.getElementById("genelToplamSatir");
-  if (mevcutSatir) mevcutSatir.remove();
+
+  // Eğer zaten toplam satırı varsa, kaldır
+  if (mevcutSatir) {
+    mevcutSatir.remove();
+    btn.style.background = "#0078d7"; // maviye döner
+    document.getElementById("btnKullaniciEkle").disabled = false;
+    document.getElementById("btnUrunEkle").disabled = false;
+    return;
+  }
+
+  urunleriHesapla();
+  const satirlar = document.querySelectorAll("#urunBody tr");
 
   let hataVar = false;
   satirlar.forEach(tr => {
@@ -138,9 +150,12 @@ function genelToplam() {
   });
 
   if (hataVar) {
+    btn.style.background = "#dc3545"; // kırmızı
     alert("Bazı ürünlerde dağıtılan adet ile alınan adet eşleşmiyor!");
     return;
   }
+
+  btn.style.background = "#28a745"; // yeşil
 
   const toplamSatirYeni = tablo.insertRow(-1);
   toplamSatirYeni.id = "genelToplamSatir";
@@ -188,9 +203,11 @@ function tabloTemizle() {
       <th>ALINAN ADET</th>
       <th>TOPLAM FİYAT</th>`;
 
-  // Butonları yeniden aktif et
+  // Butonları ve renkleri sıfırla
   document.getElementById("btnKullaniciEkle").disabled = false;
   document.getElementById("btnUrunEkle").disabled = false;
+  const btn = document.getElementById("btnGenelToplam");
+  btn.style.background = "#0078d7";
 
   alert("Tablo sıfırlandı.");
 }
