@@ -11,7 +11,8 @@
   th { background: #e9ecef; }
   input[type="number"], input[type="text"] { width: 90%; padding: 4px; }
   button { margin: 5px; padding: 6px 12px; border: none; border-radius: 6px; background: #0078d7; color: white; cursor: pointer; }
-  button:hover { background: #005fa3; }
+  button:hover:not(:disabled) { background: #005fa3; }
+  button:disabled { background: #aaa; cursor: not-allowed; }
   .yesil { background: #90EE90; }
   .kirmizi { background: #FF6347; }
   .kontrolAlani { margin-bottom: 15px; }
@@ -23,10 +24,10 @@
 
 <div class="kontrolAlani">
   <input type="text" id="kullaniciAdi" placeholder="Kullanıcı adı giriniz">
-  <button onclick="kullaniciEkle()">Kullanıcı Ekle</button>
-  <button onclick="urunEkle()">Ürün Ekle</button>
-  <button onclick="genelToplam()">Genel Toplam</button>
-  <button onclick="tabloTemizle()">Tabloyu Temizle</button>
+  <button id="btnKullaniciEkle" onclick="kullaniciEkle()">Kullanıcı Ekle</button>
+  <button id="btnUrunEkle" onclick="urunEkle()">Ürün Ekle</button>
+  <button id="btnGenelToplam" onclick="genelToplam()">Genel Toplam</button>
+  <button id="btnTemizle" onclick="tabloTemizle()">Tabloyu Temizle</button>
 </div>
 
 <table id="urunTablo">
@@ -78,9 +79,9 @@ function kullaniciEkle() {
 
 function urunEkle() {
   const tablo = document.getElementById("urunTablo");
+  const baslikSutun = document.querySelectorAll("#baslikSatir th").length;
   const satir = document.createElement("tr");
 
-  const baslikSutun = document.querySelectorAll("#baslikSatir th").length;
   for (let i = 0; i < baslikSutun; i++) {
     const td = document.createElement("td");
     if (i === 0 || i === 1) {
@@ -116,8 +117,8 @@ function genelToplam() {
   urunleriHesapla();
   const tablo = document.getElementById("urunTablo");
   const satirlar = document.querySelectorAll("#urunBody tr");
-  let toplamSatir = document.getElementById("genelToplamSatir");
-  if (toplamSatir) toplamSatir.remove();
+  const mevcutSatir = document.getElementById("genelToplamSatir");
+  if (mevcutSatir) mevcutSatir.remove();
 
   let hataVar = false;
   satirlar.forEach(tr => {
@@ -143,11 +144,12 @@ function genelToplam() {
 
   const toplamSatirYeni = tablo.insertRow(-1);
   toplamSatirYeni.id = "genelToplamSatir";
+
   const hucre = toplamSatirYeni.insertCell(0);
   hucre.colSpan = 2;
   hucre.textContent = "GENEL TOPLAM";
   hucre.style.fontWeight = "bold";
-  toplamSatirYeni.insertCell(1); // Boş
+  hucre.style.textAlign = "center";
 
   const baslikSutun = document.querySelectorAll("#baslikSatir th").length;
   for (let i = 2; i < baslikSutun; i++) {
@@ -161,6 +163,10 @@ function genelToplam() {
     const td = toplamSatirYeni.insertCell(-1);
     td.textContent = toplam.toFixed(2);
   }
+
+  // Butonları devre dışı bırak
+  document.getElementById("btnKullaniciEkle").disabled = true;
+  document.getElementById("btnUrunEkle").disabled = true;
 }
 
 function tabloTemizle() {
@@ -181,6 +187,11 @@ function tabloTemizle() {
       <th>ADET FİYATI</th>
       <th>ALINAN ADET</th>
       <th>TOPLAM FİYAT</th>`;
+
+  // Butonları yeniden aktif et
+  document.getElementById("btnKullaniciEkle").disabled = false;
+  document.getElementById("btnUrunEkle").disabled = false;
+
   alert("Tablo sıfırlandı.");
 }
 </script>
