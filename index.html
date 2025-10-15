@@ -19,21 +19,21 @@
   .btnRemove { background: #dc3545; border-radius: 50%; width: 24px; height: 24px; padding: 0; font-weight: bold; }
   .btnAdd:disabled, .btnRemove:disabled { background: #b0b0b0; cursor: not-allowed; }
   #genelToplamSatir td { background: #fff8dc; font-weight: bold; }
+
+  /* 👇 Yeni, sade kullanıcı silme butonu */
   .removeUserBtn {
     position: absolute;
     top: 2px;
-    right: 4px;
-    background: #dc3545;
-    color: white;
+    right: 6px;
+    background: transparent;
+    color: #888;
     border: none;
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    font-size: 10px;
-    line-height: 14px;
+    font-size: 14px;
+    font-weight: bold;
     cursor: pointer;
+    transition: color 0.2s ease;
   }
-  .removeUserBtn:hover { background: #b02a37; }
+  .removeUserBtn:hover { color: #dc3545; }
 </style>
 </head>
 <body>
@@ -79,7 +79,7 @@ function kullaniciEkle() {
   const thAdet = document.createElement("th");
   thAdet.textContent = ad + " ADET";
 
-  // ❌ silme butonu ekle
+  // ❌ Kullanıcı silme butonu
   const removeBtn = document.createElement("button");
   removeBtn.textContent = "×";
   removeBtn.className = "removeUserBtn";
@@ -92,7 +92,6 @@ function kullaniciEkle() {
   baslik.appendChild(thAdet);
   baslik.appendChild(thFiyat);
 
-  // tüm satırlara ekle
   const satirlar = document.querySelectorAll("#urunBody tr");
   satirlar.forEach(tr => {
     const adet = document.createElement("td");
@@ -107,17 +106,17 @@ function kullaniciEkle() {
 }
 
 function kullaniciSil(btn) {
-  // Genel toplam aktifse silme engelli
   if (document.getElementById("btnGenelToplam").style.background === "rgb(40, 167, 69)") {
     alert("Genel toplam aktifken kullanıcı silinemez!");
     return;
   }
+  if (!confirm("Bu kullanıcıyı ve tüm verilerini silmek istediğine emin misin?")) return;
 
   const th = btn.parentElement;
   const thIndex = Array.from(th.parentElement.children).indexOf(th);
   const tablo = document.getElementById("urunTablo");
 
-  // FİYAT sütunu da silinecek
+  // FİYAT sütununu da sil
   tablo.querySelectorAll("tr").forEach(tr => {
     if (tr.cells[thIndex + 1]) tr.deleteCell(thIndex + 1);
     if (tr.cells[thIndex]) tr.deleteCell(thIndex);
