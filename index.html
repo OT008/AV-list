@@ -6,8 +6,8 @@
 <style>
   body { font-family: Arial, sans-serif; background: #f8f9fa; margin: 30px; }
   h2 { margin-bottom: 15px; }
-  table { border-collapse: collapse; width: 100%; margin-top: 10px; background: white; }
-  th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+  table { border-collapse: collapse; width: 100%; margin-top: 10px; background: white; position: relative; }
+  th, td { border: 1px solid #ccc; padding: 6px; text-align: center; position: relative; }
   th { background: #e9ecef; }
   input[type="number"], input[type="text"] { width: 90%; padding: 4px; }
   button { margin: 5px; padding: 6px 12px; border: none; border-radius: 6px; color: white; cursor: pointer; transition: background 0.3s; }
@@ -19,7 +19,21 @@
   .btnRemove { background: #dc3545; border-radius: 50%; width: 24px; height: 24px; padding: 0; font-weight: bold; }
   .btnAdd:disabled, .btnRemove:disabled { background: #b0b0b0; cursor: not-allowed; }
   #genelToplamSatir td { background: #fff8dc; font-weight: bold; }
-  #genelToplamSatir td:first-child { border-left: 2px solid #ccc; }
+  .removeUserBtn {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+    line-height: 14px;
+    cursor: pointer;
+  }
+  .removeUserBtn:hover { background: #b02a37; }
 </style>
 </head>
 <body>
@@ -64,11 +78,21 @@ function kullaniciEkle() {
   const baslik = document.getElementById("baslikSatir");
   const thAdet = document.createElement("th");
   thAdet.textContent = ad + " ADET";
+
+  // ❌ silme butonu ekle
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "×";
+  removeBtn.className = "removeUserBtn";
+  removeBtn.title = ad + " kullanıcısını sil";
+  removeBtn.onclick = function() { kullaniciSil(this); };
+  thAdet.appendChild(removeBtn);
+
   const thFiyat = document.createElement("th");
   thFiyat.textContent = ad + " FİYAT";
   baslik.appendChild(thAdet);
   baslik.appendChild(thFiyat);
 
+  // tüm satırlara ekle
   const satirlar = document.querySelectorAll("#urunBody tr");
   satirlar.forEach(tr => {
     const adet = document.createElement("td");
@@ -80,6 +104,24 @@ function kullaniciEkle() {
   });
 
   document.getElementById("kullaniciAdi").value = "";
+}
+
+function kullaniciSil(btn) {
+  // Genel toplam aktifse silme engelli
+  if (document.getElementById("btnGenelToplam").style.background === "rgb(40, 167, 69)") {
+    alert("Genel toplam aktifken kullanıcı silinemez!");
+    return;
+  }
+
+  const th = btn.parentElement;
+  const thIndex = Array.from(th.parentElement.children).indexOf(th);
+  const tablo = document.getElementById("urunTablo");
+
+  // FİYAT sütunu da silinecek
+  tablo.querySelectorAll("tr").forEach(tr => {
+    if (tr.cells[thIndex + 1]) tr.deleteCell(thIndex + 1);
+    if (tr.cells[thIndex]) tr.deleteCell(thIndex);
+  });
 }
 
 function satirEkle(btn) {
@@ -131,6 +173,7 @@ function genelToplam() {
     btn.style.background = "#0078d7";
     btnKullanici.disabled = false;
     toggleSatirButonlari(true);
+    toggleUserDelete(true);
     return;
   }
 
@@ -161,26 +204,24 @@ function genelToplam() {
   }
 
   btn.style.background = "#28a745";
+  toggleUserDelete(false);
 
   const toplamSatirYeni = tablo.insertRow(-1);
   toplamSatirYeni.id = "genelToplamSatir";
 
-  // GENEL TOPLAM hücresi – 5 sütun birleşik (+, SİTE, ÜRÜN, ADET FİYATI, ALINAN ADET)
   const genelHucre = toplamSatirYeni.insertCell(0);
   genelHucre.colSpan = 5;
   genelHucre.textContent = "GENEL TOPLAM";
   genelHucre.style.textAlign = "center";
 
-  // TOPLAM FİYAT hücresi
   let toplamFiyat = 0;
   satirlar.forEach(tr => toplamFiyat += Number(tr.cells[5].textContent) || 0);
   const tdToplam = toplamSatirYeni.insertCell(-1);
   tdToplam.textContent = toplamFiyat.toFixed(2) + " ₺";
 
-  // 🔹 Her “FİYAT” sütunu için kişi toplamı ekle
   const basliklar = document.querySelectorAll("#baslikSatir th");
   for (let i = 0; i < basliklar.length; i++) {
-    if (basliklar[i].textContent.endsWith("FİYAT") && i > 5) { // sadece kullanıcı sütunları
+    if (basliklar[i].textContent.endsWith("FİYAT") && i > 5) {
       const kisiAdi = basliklar[i].textContent.replace(" FİYAT", "").trim();
       let kisiToplam = 0;
       satirlar.forEach(tr => {
@@ -202,6 +243,12 @@ function genelToplam() {
 function toggleSatirButonlari(aktif) {
   document.querySelectorAll(".btnAdd, .btnRemove").forEach(btn => {
     btn.disabled = !aktif;
+  });
+}
+
+function toggleUserDelete(aktif) {
+  document.querySelectorAll(".removeUserBtn").forEach(btn => {
+    btn.style.display = aktif ? "inline" : "none";
   });
 }
 
