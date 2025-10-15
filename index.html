@@ -8,7 +8,7 @@
   h2 { margin-bottom: 15px; }
   table { border-collapse: collapse; width: 100%; margin-top: 10px; background: white; position: relative; }
   th, td { border: 1px solid #ccc; padding: 6px; text-align: center; position: relative; }
-  th { background: #e9ecef; }
+  th { background: #e9ecef; position: relative; } /* 🔹 X konumlandırması için gerekli */
   input[type="number"], input[type="text"] { width: 90%; padding: 4px; }
   button { margin: 5px; padding: 6px 12px; border: none; border-radius: 6px; color: white; cursor: pointer; transition: background 0.3s; }
   #btnKullaniciEkle, #btnGenelToplam { background: #0078d7; }
@@ -20,20 +20,21 @@
   .btnAdd:disabled, .btnRemove:disabled { background: #b0b0b0; cursor: not-allowed; }
   #genelToplamSatir td { background: #fff8dc; font-weight: bold; }
 
-  /* 👇 Yeni, sade kullanıcı silme butonu */
+  /* 🔹 X (kullanıcı sil) butonu: kırmızı ve sağ üstte */
   .removeUserBtn {
     position: absolute;
-    top: -2px;
-    right: -4px;
+    top: -6px;
+    right: 4px;
     background: transparent;
-    color: #888;
+    color: #dc3545;
     border: none;
     font-size: 14px;
     font-weight: bold;
     cursor: pointer;
+    line-height: 1;
     transition: color 0.2s ease;
   }
-  .removeUserBtn:hover { color: #dc3545; }
+  .removeUserBtn:hover { color: #b02a37; }
 </style>
 </head>
 <body>
