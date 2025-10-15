@@ -165,30 +165,25 @@ function genelToplam() {
   genelHucre.textContent = "GENEL TOPLAM";
   genelHucre.style.textAlign = "center";
 
+  // TOPLAM FİYAT sütunu
+  let toplamFiyat = 0;
+  satirlar.forEach(tr => toplamFiyat += Number(tr.cells[4].textContent) || 0);
+  const tdToplam = toplamSatirYeni.insertCell(-1);
+  tdToplam.textContent = toplamFiyat.toFixed(2);
+
+  // Kişi sütunları
   const basliklar = document.querySelectorAll("#baslikSatir th");
-  let toplamHucreIndex = 4; // TOPLAM FİYAT sütunu başlangıcı
-
-  // TOPLAM FİYAT sütununu hesapla
-  let toplamFiyatToplam = 0;
-  satirlar.forEach(tr => {
-    toplamFiyatToplam += Number(tr.cells[4].textContent) || 0;
-  });
-  const tdToplamFiyat = toplamSatirYeni.insertCell(1);
-  tdToplamFiyat.textContent = toplamFiyatToplam.toFixed(2);
-
-  // Kişi FİYAT sütunlarını hesapla
   for (let i = 6; i < basliklar.length; i += 2) {
-    const baslikText = basliklar[i].textContent.trim();
-    const kisiAdi = baslikText.replace(" FİYAT", "");
-
     let kisiToplam = 0;
     satirlar.forEach(tr => {
-      const hucre = tr.cells[i];
-      if (hucre) kisiToplam += Number(hucre.textContent) || 0;
+      kisiToplam += Number(tr.cells[i].textContent) || 0;
     });
 
+    // Kişi adet sütunu altına boş hücre ekle
+    toplamSatirYeni.insertCell(-1).textContent = "";
+    // Kişi fiyat sütunu altına tutarı ekle
     const td = toplamSatirYeni.insertCell(-1);
-    td.textContent = `${kisiAdi} Ödeyeceği: ${kisiToplam.toFixed(2)} ₺`;
+    td.textContent = kisiToplam.toFixed(2) + " ₺";
   }
 
   btnKullanici.disabled = true;
