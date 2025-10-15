@@ -17,6 +17,7 @@
   button:disabled { background: #b0b0b0 !important; cursor: not-allowed; }
   .yesil { background: #90EE90; }
   .kirmizi { background: #FF6347; }
+  #genelToplamSatir td { background: #fff8dc; font-weight: bold; } /* açık sarı arka plan */
 </style>
 </head>
 <body>
@@ -54,50 +55,46 @@
 
 <script>
 function kullaniciEkle() {
-  try {
-    const ad = document.getElementById("kullaniciAdi").value.trim();
-    if (!ad) { alert("Lütfen bir kullanıcı adı giriniz."); return; }
+  const ad = document.getElementById("kullaniciAdi").value.trim();
+  if (!ad) { alert("Lütfen bir kullanıcı adı giriniz."); return; }
 
-    const baslik = document.getElementById("baslikSatir");
-    const thAdet = document.createElement("th");
-    thAdet.textContent = ad + " ADET";
-    const thFiyat = document.createElement("th");
-    thFiyat.textContent = ad + " FİYAT";
-    baslik.appendChild(thAdet);
-    baslik.appendChild(thFiyat);
+  const baslik = document.getElementById("baslikSatir");
+  const thAdet = document.createElement("th");
+  thAdet.textContent = ad + " ADET";
+  const thFiyat = document.createElement("th");
+  thFiyat.textContent = ad + " FİYAT";
+  baslik.appendChild(thAdet);
+  baslik.appendChild(thFiyat);
 
-    const satirlar = document.querySelectorAll("#urunBody tr");
-    satirlar.forEach(tr => {
-      const adet = document.createElement("td");
-      adet.innerHTML = `<input type="number" min="0" value="0">`;
-      const fiyat = document.createElement("td");
-      fiyat.classList.add("readonly");
-      tr.appendChild(adet);
-      tr.appendChild(fiyat);
-    });
+  const satirlar = document.querySelectorAll("#urunBody tr");
+  satirlar.forEach(tr => {
+    const adet = document.createElement("td");
+    adet.innerHTML = `<input type="number" min="0" value="0">`;
+    const fiyat = document.createElement("td");
+    fiyat.classList.add("readonly");
+    tr.appendChild(adet);
+    tr.appendChild(fiyat);
+  });
 
-    document.getElementById("kullaniciAdi").value = "";
-  } catch (err) { console.error("Kullanıcı ekleme hatası:", err); }
+  document.getElementById("kullaniciAdi").value = "";
 }
 
 function urunEkle() {
-  try {
-    const tablo = document.getElementById("urunTablo");
-    const baslikSutun = document.querySelectorAll("#baslikSatir th").length;
-    const satir = document.createElement("tr");
+  const tablo = document.getElementById("urunTablo");
+  const baslikSutun = document.querySelectorAll("#baslikSatir th").length;
+  const satir = document.createElement("tr");
 
-    for (let i = 0; i < baslikSutun; i++) {
-      const td = document.createElement("td");
-      if (i === 0 || i === 1) {
-        td.innerHTML = `<input type="text">`;
-      } else if (i === 2 || i === 3 || (i > 4 && i % 2 === 1)) {
-        td.innerHTML = `<input type="number" min="0" value="0">`;
-      }
-      satir.appendChild(td);
+  for (let i = 0; i < baslikSutun; i++) {
+    const td = document.createElement("td");
+    if (i === 0 || i === 1) {
+      td.innerHTML = `<input type="text">`;
+    } else if (i === 2 || i === 3 || (i > 4 && i % 2 === 1)) {
+      td.innerHTML = `<input type="number" min="0" value="0">`;
     }
+    satir.appendChild(td);
+  }
 
-    tablo.querySelector("tbody").appendChild(satir);
-  } catch (err) { console.error("Ürün ekleme hatası:", err); }
+  tablo.querySelector("tbody").appendChild(satir);
 }
 
 function urunleriHesapla() {
@@ -119,84 +116,81 @@ function urunleriHesapla() {
 }
 
 function genelToplam() {
-  try {
-    const btn = document.getElementById("btnGenelToplam");
-    const tablo = document.getElementById("urunTablo");
-    const mevcutSatir = document.getElementById("genelToplamSatir");
-    const btnKullanici = document.getElementById("btnKullaniciEkle");
-    const btnUrun = document.getElementById("btnUrunEkle");
+  const btn = document.getElementById("btnGenelToplam");
+  const tablo = document.getElementById("urunTablo");
+  const mevcutSatir = document.getElementById("genelToplamSatir");
+  const btnKullanici = document.getElementById("btnKullaniciEkle");
+  const btnUrun = document.getElementById("btnUrunEkle");
 
-    // Zaten varsa: kaldır
-    if (mevcutSatir) {
-      mevcutSatir.remove();
-      btn.style.background = "#0078d7"; // maviye döner
-      btnKullanici.disabled = false;
-      btnUrun.disabled = false;
-      return;
+  if (mevcutSatir) {
+    mevcutSatir.remove();
+    btn.style.background = "#0078d7";
+    btnKullanici.disabled = false;
+    btnUrun.disabled = false;
+    return;
+  }
+
+  urunleriHesapla();
+  const satirlar = document.querySelectorAll("#urunBody tr");
+  let hataVar = false;
+
+  satirlar.forEach(tr => {
+    let toplamAdet = 0;
+    for (let j = 5; j < tr.cells.length; j += 2) {
+      const adet = tr.cells[j].querySelector("input");
+      if (adet) toplamAdet += Number(adet.value);
     }
+    const alinan = Number(tr.cells[3].querySelector("input").value);
+    const adetHucre = tr.cells[3].querySelector("input");
+    if (alinan === toplamAdet) {
+      adetHucre.style.background = "#90EE90";
+    } else {
+      adetHucre.style.background = "#FF6347";
+      hataVar = true;
+    }
+  });
 
-    urunleriHesapla();
-    const satirlar = document.querySelectorAll("#urunBody tr");
-    let hataVar = false;
+  if (hataVar) {
+    btn.style.background = "#dc3545";
+    alert("Bazı ürünlerde dağıtılan adet ile alınan adet eşleşmiyor!");
+    return;
+  }
 
+  btn.style.background = "#28a745";
+
+  const toplamSatirYeni = tablo.insertRow(-1);
+  toplamSatirYeni.id = "genelToplamSatir";
+
+  // Genel toplam yazısı (4 hücre birleşimi)
+  const hucreToplam = toplamSatirYeni.insertCell(0);
+  hucreToplam.colSpan = 4;
+  hucreToplam.textContent = "GENEL TOPLAM";
+  hucreToplam.style.textAlign = "center";
+
+  const basliklar = document.querySelectorAll("#baslikSatir th");
+  for (let i = 4; i < basliklar.length; i++) {
+    const baslikText = basliklar[i].textContent;
+    if (!baslikText.includes("FİYAT")) continue;
+
+    let toplam = 0;
     satirlar.forEach(tr => {
-      let toplamAdet = 0;
-      for (let j = 5; j < tr.cells.length; j += 2) {
-        const adet = tr.cells[j].querySelector("input");
-        if (adet) toplamAdet += Number(adet.value);
-      }
-      const alinan = Number(tr.cells[3].querySelector("input").value);
-      const adetHucre = tr.cells[3].querySelector("input");
-      if (alinan === toplamAdet) {
-        adetHucre.style.background = "#90EE90";
-      } else {
-        adetHucre.style.background = "#FF6347";
-        hataVar = true;
-      }
+      const val = tr.cells[i].querySelector("input")
+        ? Number(tr.cells[i].querySelector("input").value)
+        : Number(tr.cells[i].textContent);
+      toplam += val || 0;
     });
 
-    if (hataVar) {
-      btn.style.background = "#dc3545"; // kırmızı
-      alert("Bazı ürünlerde dağıtılan adet ile alınan adet eşleşmiyor!");
-      return;
+    const td = toplamSatirYeni.insertCell(-1);
+    if (baslikText === "TOPLAM FİYAT") {
+      td.textContent = toplam.toFixed(2);
+    } else {
+      const kisiAdi = baslikText.replace(" FİYAT", "");
+      td.textContent = `${kisiAdi} Ödeyeceği: ${toplam.toFixed(2)}`;
     }
+  }
 
-    btn.style.background = "#28a745"; // yeşil
-    const toplamSatirYeni = tablo.insertRow(-1);
-    toplamSatirYeni.id = "genelToplamSatir";
-
-    // İlk 4 sütun boş, 5. sütundan itibaren hesaplanır
-    toplamSatirYeni.insertCell(0).textContent = "GENEL TOPLAM";
-    toplamSatirYeni.cells[0].style.fontWeight = "bold";
-    toplamSatirYeni.insertCell(1).textContent = "";
-    toplamSatirYeni.insertCell(2).textContent = "";
-    toplamSatirYeni.insertCell(3).textContent = "";
-
-    const basliklar = document.querySelectorAll("#baslikSatir th");
-    for (let i = 4; i < basliklar.length; i++) {
-      const baslikText = basliklar[i].textContent;
-      if (!baslikText.includes("FİYAT")) continue; // sadece fiyat sütunları
-
-      let toplam = 0;
-      satirlar.forEach(tr => {
-        const val = tr.cells[i].querySelector("input")
-          ? Number(tr.cells[i].querySelector("input").value)
-          : Number(tr.cells[i].textContent);
-        toplam += val || 0;
-      });
-
-      const td = toplamSatirYeni.insertCell(-1);
-      if (baslikText === "TOPLAM FİYAT") {
-        td.textContent = toplam.toFixed(2);
-      } else {
-        const kisiAdi = baslikText.replace(" FİYAT", "");
-        td.textContent = `${kisiAdi} Ödeyeceği: ${toplam.toFixed(2)}`;
-      }
-    }
-
-    btnKullanici.disabled = true;
-    btnUrun.disabled = true;
-  } catch (err) { console.error("Genel toplam hatası:", err); }
+  btnKullanici.disabled = true;
+  btnUrun.disabled = true;
 }
 
 function tabloTemizle() {
@@ -215,7 +209,9 @@ function tabloTemizle() {
       <th>ADET FİYATI</th>
       <th>ALINAN ADET</th>
       <th>TOPLAM FİYAT</th>`;
-  document.getElementById("btnGenelToplam").style.background = "#0078d7";
+
+  const btn = document.getElementById("btnGenelToplam");
+  btn.style.background = "#0078d7";
   document.getElementById("btnKullaniciEkle").disabled = false;
   document.getElementById("btnUrunEkle").disabled = false;
   alert("Tablo sıfırlandı.");
