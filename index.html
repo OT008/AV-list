@@ -80,7 +80,6 @@ function kullaniciEkle() {
   const thAdet = document.createElement("th");
   thAdet.textContent = ad + " ADET";
 
-  // ❌ Kullanıcı silme butonu
   const removeBtn = document.createElement("button");
   removeBtn.textContent = "×";
   removeBtn.className = "removeUserBtn";
@@ -117,7 +116,6 @@ function kullaniciSil(btn) {
   const thIndex = Array.from(th.parentElement.children).indexOf(th);
   const tablo = document.getElementById("urunTablo");
 
-  // FİYAT sütununu da sil
   tablo.querySelectorAll("tr").forEach(tr => {
     if (tr.cells[thIndex + 1]) tr.deleteCell(thIndex + 1);
     if (tr.cells[thIndex]) tr.deleteCell(thIndex);
@@ -276,6 +274,18 @@ function tabloTemizle() {
   toggleSatirButonlari(true);
   alert("Tablo sıfırlandı.");
 }
+
+// 🔹 Hücreye tıklayınca "0" silinsin, boş bırakılırsa geri gelsin
+document.addEventListener("focusin", e => {
+  if (e.target.tagName === "INPUT" && e.target.type === "number") {
+    if (e.target.value === "0") e.target.value = "";
+  }
+});
+document.addEventListener("focusout", e => {
+  if (e.target.tagName === "INPUT" && e.target.type === "number") {
+    if (e.target.value === "") e.target.value = "0";
+  }
+});
 </script>
 
 </body>
