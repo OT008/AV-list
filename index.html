@@ -169,21 +169,19 @@ function genelToplam() {
   let toplamFiyat = 0;
   satirlar.forEach(tr => toplamFiyat += Number(tr.cells[4].textContent) || 0);
   const tdToplam = toplamSatirYeni.insertCell(-1);
-  tdToplam.textContent = toplamFiyat.toFixed(2);
+  tdToplam.textContent = toplamFiyat.toFixed(2) + " ₺";
 
-  // Kişi sütunları
+  // Kişi sütunları: "Kişi Ödeyeceği | X ₺"
   const basliklar = document.querySelectorAll("#baslikSatir th");
   for (let i = 6; i < basliklar.length; i += 2) {
+    const kisiAdi = basliklar[i].textContent.replace(" FİYAT", "").trim();
     let kisiToplam = 0;
-    satirlar.forEach(tr => {
-      kisiToplam += Number(tr.cells[i].textContent) || 0;
-    });
+    satirlar.forEach(tr => kisiToplam += Number(tr.cells[i].textContent) || 0);
 
-    // Kişi adet sütunu altına boş hücre ekle
-    toplamSatirYeni.insertCell(-1).textContent = "";
-    // Kişi fiyat sütunu altına tutarı ekle
-    const td = toplamSatirYeni.insertCell(-1);
-    td.textContent = kisiToplam.toFixed(2) + " ₺";
+    const tdYazi = toplamSatirYeni.insertCell(-1);
+    tdYazi.textContent = `${kisiAdi} Ödeyeceği`;
+    const tdTutar = toplamSatirYeni.insertCell(-1);
+    tdTutar.textContent = `${kisiToplam.toFixed(2)} ₺`;
   }
 
   btnKullanici.disabled = true;
