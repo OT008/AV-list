@@ -161,11 +161,11 @@ function genelToplam() {
   const toplamSatirYeni = tablo.insertRow(-1);
   toplamSatirYeni.id = "genelToplamSatir";
 
-  // Genel toplam yazısı (4 hücre birleşimi)
-  const hucreToplam = toplamSatirYeni.insertCell(0);
-  hucreToplam.colSpan = 4;
-  hucreToplam.textContent = "GENEL TOPLAM";
-  hucreToplam.style.textAlign = "center";
+  // Genel toplam hücresi (4 hücre birleşimi)
+  const genelHucre = toplamSatirYeni.insertCell(0);
+  genelHucre.colSpan = 4;
+  genelHucre.textContent = "GENEL TOPLAM";
+  genelHucre.style.textAlign = "center";
 
   const basliklar = document.querySelectorAll("#baslikSatir th");
   for (let i = 4; i < basliklar.length; i++) {
@@ -180,7 +180,8 @@ function genelToplam() {
       toplam += val || 0;
     });
 
-    const td = toplamSatirYeni.insertCell(-1);
+    // doğru hizalama için boş hücreler eklenmeden hesapla
+    const td = toplamSatirYeni.insertCell(i - 3); // ofset düzeltme
     if (baslikText === "TOPLAM FİYAT") {
       td.textContent = toplam.toFixed(2);
     } else {
