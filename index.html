@@ -13,9 +13,9 @@
   button { margin: 5px; padding: 6px 12px; border: none; border-radius: 6px; color: white; cursor: pointer; transition: background 0.3s; }
   #btnKullaniciEkle, #btnUrunEkle { background: #0078d7; }
   #btnGenelToplam { background: #0078d7; }
-  #btnTemizle { background: #6c757d; }
+  #btnTemizle { background: #dc3545; } /* kırmızıya çevrildi */
   button:hover:not(:disabled) { filter: brightness(0.9); }
-  button:disabled { background: #aaa; cursor: not-allowed; }
+  button:disabled { background: #b0b0b0 !important; cursor: not-allowed; } /* gri devre dışı rengi */
   .yesil { background: #90EE90; }
   .kirmizi { background: #FF6347; }
 </style>
@@ -119,13 +119,15 @@ function genelToplam() {
   const btn = document.getElementById("btnGenelToplam");
   const tablo = document.getElementById("urunTablo");
   const mevcutSatir = document.getElementById("genelToplamSatir");
+  const btnKullanici = document.getElementById("btnKullaniciEkle");
+  const btnUrun = document.getElementById("btnUrunEkle");
 
   // Eğer zaten toplam satırı varsa, kaldır
   if (mevcutSatir) {
     mevcutSatir.remove();
     btn.style.background = "#0078d7"; // maviye döner
-    document.getElementById("btnKullaniciEkle").disabled = false;
-    document.getElementById("btnUrunEkle").disabled = false;
+    btnKullanici.disabled = false;
+    btnUrun.disabled = false;
     return;
   }
 
@@ -179,9 +181,9 @@ function genelToplam() {
     td.textContent = toplam.toFixed(2);
   }
 
-  // Butonları devre dışı bırak
-  document.getElementById("btnKullaniciEkle").disabled = true;
-  document.getElementById("btnUrunEkle").disabled = true;
+  // Butonları devre dışı bırak + gri renk
+  btnKullanici.disabled = true;
+  btnUrun.disabled = true;
 }
 
 function tabloTemizle() {
@@ -204,10 +206,10 @@ function tabloTemizle() {
       <th>TOPLAM FİYAT</th>`;
 
   // Butonları ve renkleri sıfırla
-  document.getElementById("btnKullaniciEkle").disabled = false;
-  document.getElementById("btnUrunEkle").disabled = false;
   const btn = document.getElementById("btnGenelToplam");
   btn.style.background = "#0078d7";
+  document.getElementById("btnKullaniciEkle").disabled = false;
+  document.getElementById("btnUrunEkle").disabled = false;
 
   alert("Tablo sıfırlandı.");
 }
